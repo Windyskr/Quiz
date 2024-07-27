@@ -25,18 +25,22 @@
         </swiper-item>
       </swiper>
       <view class="quiz-actions">
-        <button class="share-btn">分享</button>
-        <button class="answer-card-btn" @click="showAnswerCard = true">答题卡</button>
+        <button class="share-btn" @click="showSharePopup">分享</button>
+        <button class="answer-card-btn" @click="showAnswerCard">答题卡</button>
       </view>
     </template>
-
-    <AnswerCard
-        v-if="showAnswerCard"
-        :answeredQuestions="answeredQuestions"
-        @close="showAnswerCard = false"
-        @goToQuestion="goToQuestion"
-        @submit="submitQuiz"
-    />
+    <uni-popup ref="answerCardPopup" type="bottom" border-radius="10px 10px 0 0">
+      <AnswerCard
+          :answeredQuestions="answeredQuestions"
+          :totalQuestions="totalQuestions"
+          @close="closeAnswerCard"
+          @goToQuestion="goToQuestion"
+          @submit="submitQuiz"
+      />
+    </uni-popup>
+    <uni-popup ref="sharePopup" type="share">
+      <uni-popup-share title="分享到" @select="select"></uni-popup-share>
+    </uni-popup>
   </view>
 </template>
 
@@ -48,7 +52,7 @@ import AnswerCard from './AnswerCard.vue';
 
 const quizTitle = ref('');
 const currentQuestion = ref(1);
-const totalQuestions = ref(3);
+const totalQuestions = computed(() => questions.value.length);
 const timer = ref(0);
 const error = ref('');
 
@@ -105,7 +109,7 @@ onUnmounted(() => {
 });
 
 watch(currentQuestion, (newVal) => {
-  setNavigationBarTitle(`${quizTitle.value} (${newVal}/${totalQuestions.value})`);
+  // setNavigationBarTitle(`${quizTitle.value} (${newVal}/${totalQuestions.value})`);
 });
 
 const startTimer = () => {
@@ -134,7 +138,22 @@ const setNavigationBarTitle = (title) => {
   });
 };
 
-const showAnswerCard = ref(false);
+const answerCardPopup = ref(null);
+const showAnswerCard = ()=> {
+  answerCardPopup.value.open();
+};
+
+const closeAnswerCard = () => {
+  answerCardPopup.value.close();
+};
+
+const sharePopup = ref(null);
+const showSharePopup = () => {
+  sharePopup.value.open();
+};
+const closeSharePopup = () => {
+  sharePopup.value.close();
+};
 
 const answeredQuestions = computed(() => {
   return questions.value
@@ -144,11 +163,12 @@ const answeredQuestions = computed(() => {
 
 const goToQuestion = (questionNumber) => {
   currentQuestion.value = questionNumber;
-  showAnswerCard.value = false;
+  closeAnswerCard();
 };
 
 const submitQuiz = () => {
-  showAnswerCard.value = false;
+  // todo: submit quiz
+  closeAnswerCard();
 };
 </script>
 

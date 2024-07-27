@@ -14,9 +14,9 @@
     <view class="instruction">
       <text>点击题目序号可跳转到该题哦！</text>
     </view>
-    <view class="question-grid">
+    <view class="question-grid" :style="gridStyle">
       <view
-          v-for="n in 15"
+          v-for="n in totalQuestions"
           :key="n"
           class="question-number"
           :class="{ answered: isAnswered(n) }"
@@ -32,10 +32,16 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
+
 const props = defineProps({
   answeredQuestions: {
     type: Array,
     default: () => []
+  },
+  totalQuestions: {
+    type: Number,
+    required: true
   }
 });
 
@@ -56,12 +62,19 @@ const goToQuestion = (questionNumber) => {
 const submitQuiz = () => {
   emit('submit');
 };
+
+const gridStyle = computed(() => {
+  const columns = props.totalQuestions <= 5 ? props.totalQuestions : 5;
+  return {
+    gridTemplateColumns: `repeat(${columns}, 1fr)`
+  };
+});
 </script>
 
 <style scoped>
 .answer-card {
   background-color: white;
-  border-radius: 10px;
+  border-radius: 10px 10px 0 0;
   padding: 20px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
@@ -107,7 +120,6 @@ const submitQuiz = () => {
 
 .question-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
   gap: 10px;
   margin-bottom: 20px;
 }
